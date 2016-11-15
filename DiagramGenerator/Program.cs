@@ -4,12 +4,12 @@ using System.Collections.Generic;
 
 namespace DiagramGenerator
 {
-
     public class Program
     {
-        private static readonly CSharpAnalyzer Analyzer = new CSharpAnalyzer(Console.WriteLine);
-        private static readonly UmlGenerator Generator = new UmlGenerator();
-        private static CSharpObjectCollection coll = null;
+        private static CSharpAnalyzer Analyzer;
+        private static UmlGenerator Generator;
+        private static CSharpObjectCollection Collection;
+        private static Settings Settings;
 
         private static void SaveFile(List<string> uml, string fileName)
         {
@@ -36,10 +36,12 @@ namespace DiagramGenerator
                 Console.WriteLine($"Processing directory {dir}");
             }
 
+            Settings = new Settings(dir + @"\dg.cfg");
+            Analyzer = new CSharpAnalyzer(Settings, Console.WriteLine);
+            Generator = new UmlGenerator();
             var files = Directory.EnumerateFiles(Path.GetFullPath(dir), "*.cs", SearchOption.AllDirectories);
-            coll = Analyzer.AnalyzeFiles(files);
-            SaveFile(Generator.GeneratePlantUml(coll), $"{dir}\\uml.plantuml");
-            Console.ReadLine();
+            Collection = Analyzer.AnalyzeFiles(files);
+            SaveFile(Generator.GeneratePlantUml(Collection), $"{dir}\\uml.plantuml");
         }
     }
 }

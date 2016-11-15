@@ -59,14 +59,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigFile.cs" />
     <Compile Include="CSharpAnalyzer.cs" />
     <Compile Include="CSharpVisitor.cs" />
     <Compile Include="CSharpObjects.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="UmlGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="dg.cfg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
