@@ -63,7 +63,7 @@ namespace DiagramGenerator
 
         private void DetermineExtensionAndComposition(ClassDeclarationSyntax c, CSharpObjectCollection coll)
         {
-            if (c.BaseList != null)
+            if (c.BaseList != null & settings.IncludeInheritance)
             {
                 foreach (var baseType in c.BaseList.Types)
                 {
@@ -71,35 +71,38 @@ namespace DiagramGenerator
                     log?.Invoke($"{c.Identifier.ToString()} extends {baseType.Type.ToString()}");
                 }
             }
-            foreach (var member in c.Members)
+            if (settings.IncludeAssociations)
             {
-                if (member is FieldDeclarationSyntax)
+                foreach (var member in c.Members)
                 {
-                    try
+                    if (member is FieldDeclarationSyntax)
                     {
-                        var field = member as FieldDeclarationSyntax;
-                        var type = field.Declaration.Type;
-                        if (!isPrivate(field) || settings.IncludePrivateReferences)
+                        try
                         {
-                            if (type is IdentifierNameSyntax)
+                            var field = member as FieldDeclarationSyntax;
+                            var type = field.Declaration.Type;
+                            if (!isPrivate(field) || settings.IncludePrivateReferences)
                             {
-                                coll.SetAssociation(c.Identifier.ToString(), (type as IdentifierNameSyntax).Identifier.Text);
-                                log?.Invoke($"{c.Identifier.ToString()} associates to {(type as IdentifierNameSyntax).Identifier.Text}");
-                            }
-                            else if (type is GenericNameSyntax)
-                            {
-                                coll.SetAssociation(c.Identifier.ToString(), (type as GenericNameSyntax).Identifier.Text);
-                                foreach (var arg in (type as GenericNameSyntax).TypeArgumentList.Arguments)
+                                if (type is IdentifierNameSyntax)
                                 {
-                                    coll.SetAssociation(c.Identifier.ToString(), arg.ToString());
-                                    log?.Invoke($"{c.Identifier.ToString()} associates to {arg.ToString()}");
+                                    coll.SetAssociation(c.Identifier.ToString(), (type as IdentifierNameSyntax).Identifier.Text);
+                                    log?.Invoke($"{c.Identifier.ToString()} associates to {(type as IdentifierNameSyntax).Identifier.Text}");
+                                }
+                                else if (type is GenericNameSyntax)
+                                {
+                                    coll.SetAssociation(c.Identifier.ToString(), (type as GenericNameSyntax).Identifier.Text);
+                                    foreach (var arg in (type as GenericNameSyntax).TypeArgumentList.Arguments)
+                                    {
+                                        coll.SetAssociation(c.Identifier.ToString(), arg.ToString());
+                                        log?.Invoke($"{c.Identifier.ToString()} associates to {arg.ToString()}");
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        log?.Invoke(e.ToString());
+                        catch (Exception e)
+                        {
+                            log?.Invoke(e.ToString());
+                        }
                     }
                 }
             }

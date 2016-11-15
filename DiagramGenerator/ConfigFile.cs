@@ -17,7 +17,7 @@ namespace DiagramGenerator
                 var eqPos = line.IndexOf("=");
                 if (eqPos > 0)
                 {
-                    values.Add(line.Substring(0, eqPos), line.Substring(eqPos+1));
+                    values.Add(line.Substring(0, eqPos).Trim(), line.Substring(eqPos+1).Trim());
                 }
             }
         }

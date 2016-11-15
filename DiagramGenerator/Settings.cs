@@ -6,6 +6,8 @@ namespace DiagramGenerator
     public class Settings
     {
         public bool IncludePrivateReferences { get; }
+        public bool IncludeAssociations { get; }
+        public bool IncludeInheritance { get; }
 
         public Settings(string settingsFile)
         {
@@ -13,6 +15,8 @@ namespace DiagramGenerator
             {
                 var f = new ConfigFile(settingsFile);
                 IncludePrivateReferences = f.ReadBool("include_private_references");
+                IncludeAssociations = f.ReadBool("include_associations");
+                IncludeInheritance = f.ReadBool("include_inheritance");
             }
         }
     }
