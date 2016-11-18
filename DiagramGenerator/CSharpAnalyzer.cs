@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DiagramGenerator
@@ -9,11 +7,9 @@ namespace DiagramGenerator
     public class CSharpAnalyzer
     {
         private readonly Action<string> log;
-        private readonly Settings settings;
 
-        public CSharpAnalyzer(Settings settings, Action<string> log = null)
+        public CSharpAnalyzer(Action<string> log = null)
         {
-            this.settings = settings;
             this.log = log;
         }
 
@@ -25,13 +21,15 @@ namespace DiagramGenerator
             // Pass 1 - add all classes and interfaces found in the files.
             visitor.HandleClass = c =>
             {
-                coll.AddClass(c.Identifier.ToString());
-                log?.Invoke($"Class: {c.Identifier.ToString()}");
+                var name = c.Identifier.ToString();
+                coll.AddClass(name);
+                log?.Invoke($"Class: {name}");
             };
             visitor.HandleInterface = i =>
             {
-                coll.AddInterface(i.Identifier.ToString());
-                log?.Invoke($"Interface: {i.Identifier.ToString()}");
+                var name = i.Identifier.ToString();
+                coll.AddInterface(name);
+                log?.Invoke($"Interface: {name}");
             };
             foreach (var file in files)
             {
@@ -49,21 +47,33 @@ namespace DiagramGenerator
             return coll;
         }
 
-        private bool isPrivate(FieldDeclarationSyntax field)
+        private CSharpVisibility GetVisibility(FieldDeclarationSyntax field)
         {
             foreach (var modifier in field.Modifiers)
             {
                 if (modifier.Text == "private")
                 {
-                    return true;
+                    return CSharpVisibility.Private;
+                }
+                if (modifier.Text == "protected")
+                {
+                    return CSharpVisibility.Protected;
+                }
+                if (modifier.Text == "internal")
+                {
+                    return CSharpVisibility.Internal;
+                }
+                if (modifier.Text == "public")
+                {
+                    return CSharpVisibility.Public;
                 }
             }
-            return false;
+            return CSharpVisibility.Public;
         }
 
         private void DetermineExtensionAndComposition(ClassDeclarationSyntax c, CSharpObjectCollection coll)
         {
-            if (c.BaseList != null & settings.IncludeInheritance)
+            if (c.BaseList != null)
             {
                 foreach (var baseType in c.BaseList.Types)
                 {
@@ -71,41 +81,45 @@ namespace DiagramGenerator
                     log?.Invoke($"{c.Identifier.ToString()} extends {baseType.Type.ToString()}");
                 }
             }
-            if (settings.IncludeAssociations)
+            foreach (var member in c.Members)
             {
-                foreach (var member in c.Members)
+                if (member is FieldDeclarationSyntax)
                 {
-                    if (member is FieldDeclarationSyntax)
+                    try
                     {
-                        try
+                        var visibility = GetVisibility(member as FieldDeclarationSyntax);
+                        var field = member as FieldDeclarationSyntax;
+                        var type = field.Declaration.Type;
+                        if (type is IdentifierNameSyntax)
                         {
-                            var field = member as FieldDeclarationSyntax;
-                            var type = field.Declaration.Type;
-                            if (!isPrivate(field) || settings.IncludePrivateReferences)
+                            coll.SetAssociation(
+                                c.Identifier.ToString(),
+                                (type as IdentifierNameSyntax).Identifier.Text,
+                                visibility);
+                            log?.Invoke(
+                                $"{c.Identifier.ToString()} associates to {(type as IdentifierNameSyntax).Identifier.Text}");
+                        }
+                        else if (type is GenericNameSyntax)
+                        {
+                            coll.SetAssociation(
+                                c.Identifier.ToString(), 
+                                (type as GenericNameSyntax).Identifier.Text,
+                                visibility);
+                            foreach (var arg in (type as GenericNameSyntax).TypeArgumentList.Arguments)
                             {
-                                if (type is IdentifierNameSyntax)
-                                {
-                                    coll.SetAssociation(c.Identifier.ToString(), (type as IdentifierNameSyntax).Identifier.Text);
-                                    log?.Invoke($"{c.Identifier.ToString()} associates to {(type as IdentifierNameSyntax).Identifier.Text}");
-                                }
-                                else if (type is GenericNameSyntax)
-                                {
-                                    coll.SetAssociation(c.Identifier.ToString(), (type as GenericNameSyntax).Identifier.Text);
-                                    foreach (var arg in (type as GenericNameSyntax).TypeArgumentList.Arguments)
-                                    {
-                                        coll.SetAssociation(c.Identifier.ToString(), arg.ToString());
-                                        log?.Invoke($"{c.Identifier.ToString()} associates to {arg.ToString()}");
-                                    }
-                                }
+                                coll.SetAssociation(c.Identifier.ToString(), arg.ToString(), visibility);
+                                log?.Invoke($"{c.Identifier.ToString()} associates to {arg.ToString()}");
                             }
                         }
-                        catch (Exception e)
-                        {
-                            log?.Invoke(e.ToString());
-                        }
+
+                    }
+                    catch (Exception e)
+                    {
+                        log?.Invoke(e.ToString());
                     }
                 }
             }
+
         }
     }
 }

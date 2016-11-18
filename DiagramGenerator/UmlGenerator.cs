@@ -27,11 +27,11 @@ namespace DiagramGenerator
                 }
                 foreach (var ia in cls.InterfaceAssociations)
                 {
-                    uml.Add($"{ia.Name} <-- {cls.Name}");
+                    uml.Add($"{ia.Interface.Name} <-- {cls.Name}");
                 }
                 foreach (var ca in cls.ClassAssociations)
                 {
-                    uml.Add($"{ca.Name} <-- {cls.Name}");
+                    uml.Add($"{ca.Class.Name} <-- {cls.Name}");
                 }
             }
             uml.Add("@enduml");

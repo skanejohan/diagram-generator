@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace DiagramGenerator
 {
@@ -36,12 +37,23 @@ namespace DiagramGenerator
                 Console.WriteLine($"Processing directory {dir}");
             }
 
-            Settings = new Settings(dir + @"\dg.cfg");
-            Analyzer = new CSharpAnalyzer(Settings, Console.WriteLine);
+            Analyzer = new CSharpAnalyzer(Console.WriteLine);
             Generator = new UmlGenerator();
             var files = Directory.EnumerateFiles(Path.GetFullPath(dir), "*.cs", SearchOption.AllDirectories);
             Collection = Analyzer.AnalyzeFiles(files);
-            SaveFile(Generator.GeneratePlantUml(Collection), $"{dir}\\uml.plantuml");
+
+            var settingsFiles = Directory.EnumerateFiles(Path.GetFullPath(dir), "*.dg.cfg", SearchOption.AllDirectories).ToList();
+            if (settingsFiles.Count == 0)
+            {
+                settingsFiles.Add(dir + @"\default.dg.cfg");
+            }
+
+            foreach (var settingsFile in settingsFiles)
+            {
+                Settings = new Settings(settingsFile);
+                var coll = Settings.StartClass == "" ? Collection : Collection.Clone(Settings.StartClass, Settings);
+                SaveFile(Generator.GeneratePlantUml(coll), settingsFile.Replace(".dg.cfg", ".plantuml"));
+            }
         }
     }
 }
