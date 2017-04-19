@@ -51,7 +51,7 @@ namespace DiagramGenerator
             foreach (var settingsFile in settingsFiles)
             {
                 Settings = new Settings(settingsFile);
-                var coll = Settings.StartClass == "" ? Collection : Collection.Clone(Settings.StartClass, Settings);
+                var coll = Settings.StartClass == "" ? Collection : Collection.Clone(Settings.StartClass, Settings, Int32.MaxValue);
                 SaveFile(Generator.GeneratePlantUml(coll), settingsFile.Replace(".dg.cfg", ".plantuml"));
             }
         }

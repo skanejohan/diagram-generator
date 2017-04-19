@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DiagramGenerator
 {
@@ -11,17 +14,25 @@ namespace DiagramGenerator
         Public
     }
 
+    [Serializable()]
     public class CSharpInterface
     {
         public string Name { get; set; }
+
+        public void Clone(CSharpObjectCollection coll)
+        {
+            coll.AddInterface(Name);
+        }
     }
 
+        [Serializable()]
     public class InterfaceAssociation
     {
         public CSharpInterface Interface { get; set; }
         public CSharpVisibility Visibility { get; set; }
     }
 
+    [Serializable()]
     public class CSharpClass : CSharpInterface
     {
         public CSharpClass Derives { get; internal set; }
@@ -79,55 +90,78 @@ namespace DiagramGenerator
             }
         }
 
-        public void Clone(CSharpObjectCollection coll, Settings settings)
+        public void Clone(CSharpObjectCollection coll, Settings settings, int depth)
         {
             coll.AddClass(Name);
 
-            foreach (var c in ClassAssociations)
+            if (depth > 0)
             {
-                if (
-                    (c.Visibility == CSharpVisibility.Public && settings.IncludePublicAssociations) ||
-                    (c.Visibility == CSharpVisibility.Protected && settings.IncludeProtectedAssociations) ||
-                    (c.Visibility == CSharpVisibility.Internal && settings.IncludeInternalAssociations) ||
-                    (c.Visibility == CSharpVisibility.Private && settings.IncludePrivateAssociations)
-                   )
+                foreach (var c in ClassAssociations)
                 {
-                    if (!coll.ClassExists(c.Class.Name))
+                    if (
+                        (c.Visibility == CSharpVisibility.Public && settings.IncludePublicAssociations) ||
+                        (c.Visibility == CSharpVisibility.Protected && settings.IncludeProtectedAssociations) ||
+                        (c.Visibility == CSharpVisibility.Internal && settings.IncludeInternalAssociations) ||
+                        (c.Visibility == CSharpVisibility.Private && settings.IncludePrivateAssociations)
+                       )
                     {
-                        c.Class.Clone(coll, settings);
+                        if (!coll.ClassExists(c.Class.Name))
+                        {
+                            c.Class.Clone(coll, settings, depth - 1);
+                        }
+                        coll.SetAssociation(Name, c.Class.Name, c.Visibility);
                     }
-                    coll.SetAssociation(Name, c.Class.Name, c.Visibility);
                 }
-            }
 
-            if (settings.IncludeInheritance)
-            {
-                foreach (var i in Implements)
+                foreach (var i in InterfaceAssociations)
                 {
-                    if (!coll.InterfaceExists(i.Name))
+                    if (
+                        (i.Visibility == CSharpVisibility.Public && settings.IncludePublicAssociations) ||
+                        (i.Visibility == CSharpVisibility.Protected && settings.IncludeProtectedAssociations) ||
+                        (i.Visibility == CSharpVisibility.Internal && settings.IncludeInternalAssociations) ||
+                        (i.Visibility == CSharpVisibility.Private && settings.IncludePrivateAssociations)
+                       )
                     {
-                        coll.AddInterface(i.Name);
+                        if (!coll.InterfaceExists(i.Interface.Name))
+                        {
+                            i.Interface.Clone(coll);
+                        }
+                        coll.SetAssociation(Name, i.Interface.Name, i.Visibility);
                     }
-                    coll.SetExtends(Name, i.Name);
                 }
-                if (Derives != null)
+
+                if (settings.IncludeInheritance)
                 {
-                    if (!coll.ClassExists(Derives.Name))
+                    foreach (var i in Implements)
                     {
-                        Derives.Clone(coll, settings);
+                        if (!coll.InterfaceExists(i.Name))
+                        {
+                            coll.AddInterface(i.Name);
+                        }
+                        coll.SetExtends(Name, i.Name);
                     }
-                    coll.SetExtends(Name, Derives.Name);
+                    if (Derives != null)
+                    {
+                        if (!coll.ClassExists(Derives.Name))
+                        {
+                            Derives.Clone(coll, settings, depth-1);
+                        }
+                        coll.SetExtends(Name, Derives.Name);
+                    }
                 }
+
             }
         }
     }
 
+    [Serializable()]
     public class ClassAssociation
     {
         public CSharpClass Class { get; set; }
         public CSharpVisibility Visibility { get; set; }
     }
 
+    [Serializable()]
     public class CSharpObjectCollection
     {
         public IEnumerable<CSharpClass> Classes => classes;
@@ -206,11 +240,29 @@ namespace DiagramGenerator
             }
         }
 
-        public CSharpObjectCollection Clone(string startClass, Settings settings)
+        public CSharpObjectCollection Clone(string startClass, Settings settings, int depth)
         {
             var coll = new CSharpObjectCollection();
-            classes.FirstOrDefault(c => c.Name == startClass)?.Clone(coll, settings);
+            classes.FirstOrDefault(c => c.Name == startClass)?.Clone(coll, settings, depth);
             return coll;
+        }
+
+        public void Serialize(string fileName)
+        {
+            Stream s = File.Create(fileName);
+            var serializer = new BinaryFormatter();
+            serializer.Serialize(s, this);
+            s.Close();
+        }
+
+        public static CSharpObjectCollection Deserialize(string fileName)
+        {
+            //var coll = new CSharpObjectCollection();
+            Stream s = File.OpenRead(fileName);
+            var serializer = new BinaryFormatter();
+            var coll = serializer.Deserialize(s);
+            s.Close();
+            return coll as CSharpObjectCollection;
         }
     }
 }

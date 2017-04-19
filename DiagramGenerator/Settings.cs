@@ -4,14 +4,14 @@ namespace DiagramGenerator
 {
     public class Settings
     {
-        public bool IncludePublicAssociations { get; }
-        public bool IncludeProtectedAssociations { get; }
-        public bool IncludeInternalAssociations { get; }
-        public bool IncludePrivateAssociations { get; }
-        public bool IncludeInheritance { get; }
-        public string StartClass { get; }
+        public bool IncludePublicAssociations { get; set; }
+        public bool IncludeProtectedAssociations { get; set; }
+        public bool IncludeInternalAssociations { get; set; }
+        public bool IncludePrivateAssociations { get; set; }
+        public bool IncludeInheritance { get; set; }
+        public string StartClass { get; set; }
 
-        public Settings(string settingsFile)
+        public Settings(string settingsFile = "")
         {
             IncludePublicAssociations = true;
             IncludeProtectedAssociations = false;

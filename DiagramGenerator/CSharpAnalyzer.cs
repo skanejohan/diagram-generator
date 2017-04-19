@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DiagramGenerator
@@ -11,6 +12,11 @@ namespace DiagramGenerator
         public CSharpAnalyzer(Action<string> log = null)
         {
             this.log = log;
+        }
+
+        public async Task<CSharpObjectCollection> AnalyzeFilesAsync(IEnumerable<string> files)
+        {
+            return await Task.Run(() => AnalyzeFiles(files));
         }
 
         public CSharpObjectCollection AnalyzeFiles(IEnumerable<string> files)

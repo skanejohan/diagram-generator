@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagramGenerator", "DiagramGenerator\DiagramGenerator.csproj", "{9039E5EC-6864-4C23-B6D9-56E13357A262}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagramGeneratorUI", "DiagramGeneratorUI\DiagramGeneratorUI.csproj", "{E95E8944-9EA5-408E-9D5E-F5E9CB51B433}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpSyntaxWalkerTest", "CSharpSyntaxWalkerTest\CSharpSyntaxWalkerTest.csproj", "{95B335A8-37C9-4C51-84C9-72E9C5C0A459}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{9039E5EC-6864-4C23-B6D9-56E13357A262}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9039E5EC-6864-4C23-B6D9-56E13357A262}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9039E5EC-6864-4C23-B6D9-56E13357A262}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E95E8944-9EA5-408E-9D5E-F5E9CB51B433}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E95E8944-9EA5-408E-9D5E-F5E9CB51B433}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E95E8944-9EA5-408E-9D5E-F5E9CB51B433}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E95E8944-9EA5-408E-9D5E-F5E9CB51B433}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95B335A8-37C9-4C51-84C9-72E9C5C0A459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95B335A8-37C9-4C51-84C9-72E9C5C0A459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95B335A8-37C9-4C51-84C9-72E9C5C0A459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95B335A8-37C9-4C51-84C9-72E9C5C0A459}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -2,7 +2,7 @@
 
 namespace DiagramGenerator
 {
-    class UmlGenerator
+    public class UmlGenerator
     {
         public List<string> GeneratePlantUml(CSharpObjectCollection coll)
         {

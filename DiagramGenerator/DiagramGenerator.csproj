@@ -69,7 +69,6 @@
     <Compile Include="UmlGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="dg.cfg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
