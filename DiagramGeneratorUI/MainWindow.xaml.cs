@@ -122,7 +122,7 @@ namespace DiagramGeneratorUI
                     IncludePrivateAssociations = PrivateAssociationsCheckBox.IsChecked.GetValueOrDefault(),
                     IncludeInheritance = InheritanceCheckBox.IsChecked.GetValueOrDefault()
                 };
-                CSharpObjectCollection coll = settings.StartClass == "" ? collection : collection.Clone(settings.StartClass, settings, (int)DepthSlider.Value);
+                CSharpObjectCollection coll = string.IsNullOrEmpty(settings.StartClass) ? collection : collection.Clone(settings.StartClass, settings, (int)DepthSlider.Value);
 
                 SaveFileDialog saveFileDialog = new()
                 {
@@ -147,7 +147,7 @@ namespace DiagramGeneratorUI
         private void PopulateStartClassComboBox(CSharpObjectCollection collection)
         {
             string oldStartClass = StartClassComboBox.Text;
-            StartClassComboBox.ItemsSource = collection.Classes.OrderBy(c => c.Name).Select(c => c.Name);
+            StartClassComboBox.ItemsSource = collection.Classes.OrderBy(c => c.Name).Select(c => c.Name).Append("");
             int index = StartClassComboBox.Items.IndexOf(oldStartClass);
             if (index != -1)
             {
