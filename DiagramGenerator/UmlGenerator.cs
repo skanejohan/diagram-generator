@@ -2,34 +2,36 @@
 
 namespace DiagramGenerator
 {
-    public class UmlGenerator
+    public static class UmlGenerator
     {
-        public List<string> GeneratePlantUml(CSharpObjectCollection coll)
+        public static List<string> GeneratePlantUml(CSharpObjectCollection coll)
         {
-            var uml = new List<string>();
+            List<string> uml = new()
+            {
+                "@startuml"
+            };
 
-            uml.Add("@startuml");
-            foreach (var i in coll.Interfaces)
+            foreach (CSharpInterface i in coll.Interfaces)
             {
                 uml.Add($"interface {i.Name}");
             }
 
-            foreach (var cls in coll.Classes)
+            foreach (CSharpClass cls in coll.Classes)
             {
                 uml.Add($"class {cls.Name}");
                 if (cls.Derives != null)
                 {
                     uml.Add($"{cls.Derives.Name} <|-- {cls.Name}");
                 }
-                foreach (var i in cls.Implements)
+                foreach (CSharpInterface i in cls.Implements)
                 {
                     uml.Add($"{i.Name} <|-- {cls.Name}");
                 }
-                foreach (var ia in cls.InterfaceAssociations)
+                foreach (InterfaceAssociation ia in cls.InterfaceAssociations)
                 {
                     uml.Add($"{ia.Interface.Name} <-- {cls.Name}");
                 }
-                foreach (var ca in cls.ClassAssociations)
+                foreach (ClassAssociation ca in cls.ClassAssociations)
                 {
                     uml.Add($"{ca.Class.Name} <-- {cls.Name}");
                 }
@@ -38,6 +40,5 @@ namespace DiagramGenerator
 
             return uml;
         }
-
     }
 }

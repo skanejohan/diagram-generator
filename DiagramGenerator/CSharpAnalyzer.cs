@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace DiagramGenerator
 {
@@ -21,23 +21,23 @@ namespace DiagramGenerator
 
         public CSharpObjectCollection AnalyzeFiles(IEnumerable<string> files)
         {
-            var visitor = new CSharpVisitor();
-            var coll = new CSharpObjectCollection();
+            CSharpVisitor visitor = new();
+            CSharpObjectCollection coll = new();
 
             // Pass 1 - add all classes and interfaces found in the files.
             visitor.HandleClass = c =>
             {
-                var name = c.Identifier.ToString();
+                string name = c.Identifier.ToString();
                 coll.AddClass(name);
                 log?.Invoke($"Class: {name}");
             };
             visitor.HandleInterface = i =>
             {
-                var name = i.Identifier.ToString();
+                string name = i.Identifier.ToString();
                 coll.AddInterface(name);
                 log?.Invoke($"Interface: {name}");
             };
-            foreach (var file in files)
+            foreach (string file in files)
             {
                 visitor.Visit(file);
             }
@@ -45,7 +45,7 @@ namespace DiagramGenerator
             // Pass 2 - handle extension and composition for all classes found in the files.
             visitor.HandleClass = c => DetermineExtensionAndComposition(c, coll);
             visitor.HandleInterface = null;
-            foreach (var file in files)
+            foreach (string file in files)
             {
                 visitor.Visit(file);
             }
@@ -53,9 +53,9 @@ namespace DiagramGenerator
             return coll;
         }
 
-        private CSharpVisibility GetVisibility(FieldDeclarationSyntax field)
+        private static CSharpVisibility GetVisibility(FieldDeclarationSyntax field)
         {
-            foreach (var modifier in field.Modifiers)
+            foreach (Microsoft.CodeAnalysis.SyntaxToken modifier in field.Modifiers)
             {
                 if (modifier.Text == "private")
                 {
@@ -81,21 +81,21 @@ namespace DiagramGenerator
         {
             if (c.BaseList != null)
             {
-                foreach (var baseType in c.BaseList.Types)
+                foreach (BaseTypeSyntax baseType in c.BaseList.Types)
                 {
                     coll.SetExtends(c.Identifier.ToString(), baseType.Type.ToString());
-                    log?.Invoke($"{c.Identifier.ToString()} extends {baseType.Type.ToString()}");
+                    log?.Invoke($"{c.Identifier} extends {baseType.Type}");
                 }
             }
-            foreach (var member in c.Members)
+            foreach (MemberDeclarationSyntax member in c.Members)
             {
                 if (member is FieldDeclarationSyntax)
                 {
                     try
                     {
-                        var visibility = GetVisibility(member as FieldDeclarationSyntax);
-                        var field = member as FieldDeclarationSyntax;
-                        var type = field.Declaration.Type;
+                        CSharpVisibility visibility = GetVisibility(member as FieldDeclarationSyntax);
+                        FieldDeclarationSyntax field = member as FieldDeclarationSyntax;
+                        TypeSyntax type = field.Declaration.Type;
                         if (type is IdentifierNameSyntax)
                         {
                             coll.SetAssociation(
@@ -103,21 +103,20 @@ namespace DiagramGenerator
                                 (type as IdentifierNameSyntax).Identifier.Text,
                                 visibility);
                             log?.Invoke(
-                                $"{c.Identifier.ToString()} associates to {(type as IdentifierNameSyntax).Identifier.Text}");
+                                $"{c.Identifier} associates to {(type as IdentifierNameSyntax).Identifier.Text}");
                         }
                         else if (type is GenericNameSyntax)
                         {
                             coll.SetAssociation(
-                                c.Identifier.ToString(), 
+                                c.Identifier.ToString(),
                                 (type as GenericNameSyntax).Identifier.Text,
                                 visibility);
-                            foreach (var arg in (type as GenericNameSyntax).TypeArgumentList.Arguments)
+                            foreach (TypeSyntax arg in (type as GenericNameSyntax).TypeArgumentList.Arguments)
                             {
                                 coll.SetAssociation(c.Identifier.ToString(), arg.ToString(), visibility);
-                                log?.Invoke($"{c.Identifier.ToString()} associates to {arg.ToString()}");
+                                log?.Invoke($"{c.Identifier} associates to {arg}");
                             }
                         }
-
                     }
                     catch (Exception e)
                     {
@@ -125,7 +124,6 @@ namespace DiagramGenerator
                     }
                 }
             }
-
         }
     }
 }

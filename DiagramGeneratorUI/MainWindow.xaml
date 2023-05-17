@@ -6,42 +6,42 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="516" Closing="Window_Closing">
     <Grid Margin="0,0,0,0">
-        <Button x:Name="PerformAnalysisButton" Content="Perform analysis" Click="PerformAnalysisButtonClick"  
-                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Width="160" Height="33"/>
-        <Button x:Name="SaveAnalysisButton" Content="Save analysis"  Click="SaveAnalysisButtonClick" IsEnabled="False" 
-                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="175,10,0,0" Width="160" Height="33"/>
-        <Button x:Name="LoadAnalysisButton" Content="Load analysis" Click="LoadAnalysisButtonClick"  
-                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="340,10,0,0" Width="160" Height="33"/>
-        <Label  x:Name="CollectionLabel" Content="No collection loaded" 
-                HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="490" 
-                HorizontalContentAlignment="Center" Foreground="Red" FontSize="18"/>
+        <Button x:Name="PerformAnalysisButton" Content="Perform analysis" Click="PerformAnalysisButtonClick"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0" Width="160" Height="33" />
+        <Button x:Name="SaveAnalysisButton" Content="Save analysis"  Click="SaveAnalysisButtonClick" IsEnabled="False"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="175,10,0,0" Width="160" Height="33" />
+        <Button x:Name="LoadAnalysisButton" Content="Load analysis" Click="LoadAnalysisButtonClick"
+                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="340,10,0,0" Width="160" Height="33" />
+        <Label  x:Name="CollectionLabel" Content="No collection loaded"
+                HorizontalAlignment="Left" Margin="10,50,0,0" VerticalAlignment="Top" Width="490"
+                HorizontalContentAlignment="Center" Foreground="Red" FontSize="18" />
         <Grid x:Name="DiagramControlsGrid"  HorizontalAlignment="Left" Height="220" Margin="12,89,0,0" VerticalAlignment="Top" Width="488" IsEnabled="False">
-            <Button x:Name="GenerateDiagramButton" Content="Generate Diagram" Click="GenerateDiagramButtonClick" 
+            <Button x:Name="GenerateDiagramButton" Content="Generate Diagram" Click="GenerateDiagramButtonClick"
                     HorizontalAlignment="Left" Margin="165,177,0,0" VerticalAlignment="Top" Width="160" Height="33" />
-            <ComboBox x:Name="StartClassComboBox" HorizontalAlignment="Left" Margin="165,10,0,0" VerticalAlignment="Top" Width="160"/>
-            <CheckBox x:Name="PublicAssociationsCheckBox" Content="Public associations" 
-                      HorizontalAlignment="Left" Margin="165,41,0,0" VerticalAlignment="Top" 
-                      Width="160" HorizontalContentAlignment="Right"/>
-            <CheckBox x:Name="ProtectedAssociationsCheckBox" Content="Protected associations" 
-                      HorizontalAlignment="Left" Margin="165,61,0,0" VerticalAlignment="Top" 
-                      Width="160" HorizontalContentAlignment="Right"/>
-            <CheckBox x:Name="InternalAssociationsCheckBox" Content="Internal associations" 
-                      HorizontalAlignment="Left" Margin="165,81,0,0" VerticalAlignment="Top" 
-                      Width="160" HorizontalContentAlignment="Right"/>
-            <CheckBox x:Name="PrivateAssociationsCheckBox" Content="Private associations" 
-                      HorizontalAlignment="Left" Margin="165,101,0,0" VerticalAlignment="Top" 
-                      Width="160" HorizontalContentAlignment="Right"/>
-            <CheckBox x:Name="InheritanceCheckBox" Content="Inheritance" 
+            <ComboBox x:Name="StartClassComboBox" HorizontalAlignment="Left" Margin="165,10,0,0" VerticalAlignment="Top" Width="160" />
+            <CheckBox x:Name="PublicAssociationsCheckBox" Content="Public associations"
+                      HorizontalAlignment="Left" Margin="165,41,0,0" VerticalAlignment="Top"
+                      Width="160" HorizontalContentAlignment="Right" />
+            <CheckBox x:Name="ProtectedAssociationsCheckBox" Content="Protected associations"
+                      HorizontalAlignment="Left" Margin="165,61,0,0" VerticalAlignment="Top"
+                      Width="160" HorizontalContentAlignment="Right" />
+            <CheckBox x:Name="InternalAssociationsCheckBox" Content="Internal associations"
+                      HorizontalAlignment="Left" Margin="165,81,0,0" VerticalAlignment="Top"
+                      Width="160" HorizontalContentAlignment="Right" />
+            <CheckBox x:Name="PrivateAssociationsCheckBox" Content="Private associations"
+                      HorizontalAlignment="Left" Margin="165,101,0,0" VerticalAlignment="Top"
+                      Width="160" HorizontalContentAlignment="Right" />
+            <CheckBox x:Name="InheritanceCheckBox" Content="Inheritance"
                       HorizontalAlignment="Left" Margin="165,121,0,0" VerticalAlignment="Top"
-                      Width="160" HorizontalContentAlignment="Right"/>
-            <Label    x:Name="DepthLabel" Content="Depth:" HorizontalAlignment="Left" 
-                      Margin="165,141,0,0" VerticalAlignment="Top"/>
+                      Width="160" HorizontalContentAlignment="Right" />
+            <Label    x:Name="DepthLabel" Content="Depth:" HorizontalAlignment="Left"
+                      Margin="165,141,0,0" VerticalAlignment="Top" />
             <Slider x:Name="DepthSlider" ValueChanged="DepthSliderValueChanged"
-                    HorizontalAlignment="Left" Margin="215,141,0,0" VerticalAlignment="Top" Width="110" 
-                    TickPlacement="BottomRight" Value="5" IsSnapToTickEnabled="True"/>
-            <Rectangle x:Name="DisableRectangle"  Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="320" Margin="-20,-88,0,0" 
+                    HorizontalAlignment="Left" Margin="215,141,0,0" VerticalAlignment="Top" Width="110"
+                    TickPlacement="BottomRight" Value="5" IsSnapToTickEnabled="True" />
+            <Rectangle x:Name="DisableRectangle"  Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="320" Margin="-20,-88,0,0"
                        Stroke="White" VerticalAlignment="Top" Width="516" Opacity="0.5"
-                       Visibility="Hidden"/>
+                       Visibility="Hidden" />
         </Grid>
     </Grid>
 </Window>

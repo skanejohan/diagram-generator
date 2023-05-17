@@ -1,61 +1,62 @@
-using System;
-using System.IO;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
+using System;
+using System.IO;
 
-public class CSharpVisitor
+namespace DiagramGenerator
 {
-	private class Walker : CSharpSyntaxWalker
-	{
-        public Action<ClassDeclarationSyntax> handleClass;
-        public Action<InterfaceDeclarationSyntax> handleInterface;
+    public class CSharpVisitor
+    {
+        private readonly Walker walker;
 
-        public override void Visit(SyntaxNode node)
+        public CSharpVisitor()
         {
-            if (node is ClassDeclarationSyntax)
-            {
-                handleClass?.Invoke((ClassDeclarationSyntax)node);
-            }
-            if (node is InterfaceDeclarationSyntax)
-            {
-                handleInterface?.Invoke((InterfaceDeclarationSyntax)node);
-            }
-            base.Visit(node);
+            walker = new Walker();
         }
-    }
 
-    private Walker walker;
-
-    public Action<ClassDeclarationSyntax> HandleClass
-    {
-        get { return walker.handleClass; }
-        set { walker.handleClass = value; }
-    }
-
-    public Action<InterfaceDeclarationSyntax> HandleInterface
-    {
-        get { return walker.handleInterface; }
-        set { walker.handleInterface = value; }
-    }
-
-    public CSharpVisitor()
-	{
-		walker = new Walker();
-	}
-
-	public void Visit(CSharpSyntaxTree tree)
-	{
-		walker.Visit(tree.GetRoot());
-	}
-
-    public void Visit(string fileName)
-    {
-        using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+        public Action<ClassDeclarationSyntax> HandleClass
         {
-            var tree = (CSharpSyntaxTree)CSharpSyntaxTree.ParseText(SourceText.From(stream));
+            get { return walker.handleClass; }
+            set { walker.handleClass = value; }
+        }
+
+        public Action<InterfaceDeclarationSyntax> HandleInterface
+        {
+            get { return walker.handleInterface; }
+            set { walker.handleInterface = value; }
+        }
+
+        public void Visit(CSharpSyntaxTree tree)
+        {
+            walker.Visit(tree.GetRoot());
+        }
+
+        public void Visit(string fileName)
+        {
+            using FileStream stream = new(fileName, FileMode.Open, FileAccess.Read);
+            CSharpSyntaxTree tree = (CSharpSyntaxTree)CSharpSyntaxTree.ParseText(SourceText.From(stream));
             Visit(tree);
+        }
+
+        private class Walker : CSharpSyntaxWalker
+        {
+            public Action<ClassDeclarationSyntax> handleClass;
+            public Action<InterfaceDeclarationSyntax> handleInterface;
+
+            public override void Visit(SyntaxNode node)
+            {
+                if (node is ClassDeclarationSyntax syntax)
+                {
+                    handleClass?.Invoke(syntax);
+                }
+                if (node is InterfaceDeclarationSyntax syntax1)
+                {
+                    handleInterface?.Invoke(syntax1);
+                }
+                base.Visit(node);
+            }
         }
     }
 }
