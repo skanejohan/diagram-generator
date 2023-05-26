@@ -1,13 +1,18 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagramGenerator", "DiagramGenerator\DiagramGenerator.csproj", "{9039E5EC-6864-4C23-B6D9-56E13357A262}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiagramGeneratorUI", "DiagramGeneratorUI\DiagramGeneratorUI.csproj", "{E95E8944-9EA5-408E-9D5E-F5E9CB51B433}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpSyntaxWalkerTest", "CSharpSyntaxWalkerTest\CSharpSyntaxWalkerTest.csproj", "{95B335A8-37C9-4C51-84C9-72E9C5C0A459}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F7BAA3A6-7A9F-426F-8373-539CB94A70C7}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

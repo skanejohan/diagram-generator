@@ -25,7 +25,7 @@ namespace DiagramGenerator
         }
     }
 
-        [Serializable()]
+    [Serializable()]
     public class InterfaceAssociation
     {
         public CSharpInterface Interface { get; set; }
@@ -35,10 +35,9 @@ namespace DiagramGenerator
     [Serializable()]
     public class CSharpClass : CSharpInterface
     {
-        public CSharpClass Derives { get; internal set; }
-        public IEnumerable<CSharpInterface> Implements => implements;
-        public IEnumerable<InterfaceAssociation> InterfaceAssociations => interfaceAssociations;
-        public IEnumerable<ClassAssociation> ClassAssociations => classAssociations;
+        private readonly List<CSharpInterface> implements;
+        private readonly List<InterfaceAssociation> interfaceAssociations;
+        private readonly List<ClassAssociation> classAssociations;
 
         public CSharpClass()
         {
@@ -47,48 +46,10 @@ namespace DiagramGenerator
             classAssociations = new List<ClassAssociation>();
         }
 
-        private readonly List<CSharpInterface> implements;
-        private readonly List<InterfaceAssociation> interfaceAssociations;
-        private readonly List<ClassAssociation> classAssociations;
-
-        internal void ExtendsInterface(CSharpInterface i)
-        {
-            implements.Add(i);
-        }
-
-        internal void AddInterfaceAssociation(CSharpInterface i, CSharpVisibility visibility)
-        {
-            var ia = interfaceAssociations.FirstOrDefault(a => a.Interface == i);
-            if (ia == null)
-            {
-                interfaceAssociations.Add(new InterfaceAssociation
-                {
-                    Interface = i,
-                    Visibility = visibility
-                });
-            }
-            else if (ia.Visibility < visibility)
-            {
-                ia.Visibility = visibility;
-            }
-        }
-
-        internal void AddClassAssociation(CSharpClass c, CSharpVisibility visibility)
-        {
-            var ca = classAssociations.FirstOrDefault(a => a.Class == c);
-            if (ca == null)
-            {
-                classAssociations.Add(new ClassAssociation
-                {
-                    Class = c,
-                    Visibility = visibility
-                });
-            }
-            else if (ca.Visibility < visibility)
-            {
-                ca.Visibility = visibility;
-            }
-        }
+        public CSharpClass Derives { get; internal set; }
+        public IEnumerable<CSharpInterface> Implements => implements;
+        public IEnumerable<InterfaceAssociation> InterfaceAssociations => interfaceAssociations;
+        public IEnumerable<ClassAssociation> ClassAssociations => classAssociations;
 
         public void Clone(CSharpObjectCollection coll, Settings settings, int depth)
         {
@@ -96,7 +57,7 @@ namespace DiagramGenerator
 
             if (depth > 0)
             {
-                foreach (var c in ClassAssociations)
+                foreach (ClassAssociation c in ClassAssociations)
                 {
                     if (
                         (c.Visibility == CSharpVisibility.Public && settings.IncludePublicAssociations) ||
@@ -113,7 +74,7 @@ namespace DiagramGenerator
                     }
                 }
 
-                foreach (var i in InterfaceAssociations)
+                foreach (InterfaceAssociation i in InterfaceAssociations)
                 {
                     if (
                         (i.Visibility == CSharpVisibility.Public && settings.IncludePublicAssociations) ||
@@ -132,7 +93,7 @@ namespace DiagramGenerator
 
                 if (settings.IncludeInheritance)
                 {
-                    foreach (var i in Implements)
+                    foreach (CSharpInterface i in Implements)
                     {
                         if (!coll.InterfaceExists(i.Name))
                         {
@@ -144,12 +105,50 @@ namespace DiagramGenerator
                     {
                         if (!coll.ClassExists(Derives.Name))
                         {
-                            Derives.Clone(coll, settings, depth-1);
+                            Derives.Clone(coll, settings, depth - 1);
                         }
                         coll.SetExtends(Name, Derives.Name);
                     }
                 }
+            }
+        }
 
+        internal void ExtendsInterface(CSharpInterface i)
+        {
+            implements.Add(i);
+        }
+
+        internal void AddInterfaceAssociation(CSharpInterface i, CSharpVisibility visibility)
+        {
+            InterfaceAssociation ia = interfaceAssociations.FirstOrDefault(a => a.Interface == i);
+            if (ia == null)
+            {
+                interfaceAssociations.Add(new InterfaceAssociation
+                {
+                    Interface = i,
+                    Visibility = visibility
+                });
+            }
+            else if (ia.Visibility < visibility)
+            {
+                ia.Visibility = visibility;
+            }
+        }
+
+        internal void AddClassAssociation(CSharpClass c, CSharpVisibility visibility)
+        {
+            ClassAssociation ca = classAssociations.FirstOrDefault(a => a.Class == c);
+            if (ca == null)
+            {
+                classAssociations.Add(new ClassAssociation
+                {
+                    Class = c,
+                    Visibility = visibility
+                });
+            }
+            else if (ca.Visibility < visibility)
+            {
+                ca.Visibility = visibility;
             }
         }
     }
@@ -164,16 +163,28 @@ namespace DiagramGenerator
     [Serializable()]
     public class CSharpObjectCollection
     {
-        public IEnumerable<CSharpClass> Classes => classes;
-        public IEnumerable<CSharpInterface> Interfaces => interfaces;
-
-        private List<CSharpClass> classes;
-        private List<CSharpInterface> interfaces;
+        private readonly List<CSharpClass> classes;
+        private readonly List<CSharpInterface> interfaces;
 
         public CSharpObjectCollection()
         {
             classes = new List<CSharpClass>();
             interfaces = new List<CSharpInterface>();
+        }
+
+        public IEnumerable<CSharpClass> Classes => classes;
+        public IEnumerable<CSharpInterface> Interfaces => interfaces;
+
+        public static CSharpObjectCollection Deserialize(string fileName)
+        {
+            //var coll = new CSharpObjectCollection();
+            Stream s = File.OpenRead(fileName);
+            BinaryFormatter serializer = new();
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
+            object coll = serializer.Deserialize(s);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
+            s.Close();
+            return coll as CSharpObjectCollection;
         }
 
         public bool ClassExists(string name)
@@ -204,9 +215,9 @@ namespace DiagramGenerator
 
         public void SetExtends(string className, string extends)
         {
-            var thisClass = classes.FirstOrDefault(c => c.Name == className);
-            var extendedClass = classes.FirstOrDefault(c => c.Name == extends);
-            var extendedInterface = interfaces.FirstOrDefault(i => i.Name == extends);
+            CSharpClass thisClass = classes.FirstOrDefault(c => c.Name == className);
+            CSharpClass extendedClass = classes.FirstOrDefault(c => c.Name == extends);
+            CSharpInterface extendedInterface = interfaces.FirstOrDefault(i => i.Name == extends);
 
             if (thisClass != null)
             {
@@ -223,9 +234,9 @@ namespace DiagramGenerator
 
         public void SetAssociation(string className, string associatesTo, CSharpVisibility visibility)
         {
-            var thisClass = classes.FirstOrDefault(c => c.Name == className);
-            var associatedClass = classes.FirstOrDefault(c => c.Name == associatesTo);
-            var associatedInterface = interfaces.FirstOrDefault(i => i.Name == associatesTo);
+            CSharpClass thisClass = classes.FirstOrDefault(c => c.Name == className);
+            CSharpClass associatedClass = classes.FirstOrDefault(c => c.Name == associatesTo);
+            CSharpInterface associatedInterface = interfaces.FirstOrDefault(i => i.Name == associatesTo);
 
             if (thisClass != null)
             {
@@ -242,7 +253,7 @@ namespace DiagramGenerator
 
         public CSharpObjectCollection Clone(string startClass, Settings settings, int depth)
         {
-            var coll = new CSharpObjectCollection();
+            CSharpObjectCollection coll = new();
             classes.FirstOrDefault(c => c.Name == startClass)?.Clone(coll, settings, depth);
             return coll;
         }
@@ -250,19 +261,11 @@ namespace DiagramGenerator
         public void Serialize(string fileName)
         {
             Stream s = File.Create(fileName);
-            var serializer = new BinaryFormatter();
+            BinaryFormatter serializer = new();
+#pragma warning disable SYSLIB0011 // Type or member is obsolete
             serializer.Serialize(s, this);
+#pragma warning restore SYSLIB0011 // Type or member is obsolete
             s.Close();
-        }
-
-        public static CSharpObjectCollection Deserialize(string fileName)
-        {
-            //var coll = new CSharpObjectCollection();
-            Stream s = File.OpenRead(fileName);
-            var serializer = new BinaryFormatter();
-            var coll = serializer.Deserialize(s);
-            s.Close();
-            return coll as CSharpObjectCollection;
         }
     }
 }

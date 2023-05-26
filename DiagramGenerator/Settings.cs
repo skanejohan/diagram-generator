@@ -4,13 +4,6 @@ namespace DiagramGenerator
 {
     public class Settings
     {
-        public bool IncludePublicAssociations { get; set; }
-        public bool IncludeProtectedAssociations { get; set; }
-        public bool IncludeInternalAssociations { get; set; }
-        public bool IncludePrivateAssociations { get; set; }
-        public bool IncludeInheritance { get; set; }
-        public string StartClass { get; set; }
-
         public Settings(string settingsFile = "")
         {
             IncludePublicAssociations = true;
@@ -21,7 +14,7 @@ namespace DiagramGenerator
             StartClass = "";
             if (File.Exists(settingsFile))
             {
-                var f = new ConfigFile(settingsFile);
+                ConfigFile f = new(settingsFile);
                 IncludePublicAssociations = f.ReadBool("include_public_associations", IncludePublicAssociations);
                 IncludeProtectedAssociations = f.ReadBool("include_protected_associations", IncludeProtectedAssociations);
                 IncludeInternalAssociations = f.ReadBool("include_internal_associations", IncludeInternalAssociations);
@@ -30,6 +23,12 @@ namespace DiagramGenerator
                 StartClass = f.ReadString("start_class", StartClass);
             }
         }
-    }
 
+        public bool IncludePublicAssociations { get; set; }
+        public bool IncludeProtectedAssociations { get; set; }
+        public bool IncludeInternalAssociations { get; set; }
+        public bool IncludePrivateAssociations { get; set; }
+        public bool IncludeInheritance { get; set; }
+        public string StartClass { get; set; }
+    }
 }

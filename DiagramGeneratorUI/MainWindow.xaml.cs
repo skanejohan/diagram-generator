@@ -1,14 +1,14 @@
-﻿using System;
+﻿using DiagramGenerator;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
-using DiagramGenerator;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using SaveFileDialog = Microsoft.Win32.SaveFileDialog;
-using System.Collections.Generic;
 
 namespace DiagramGeneratorUI
 {
@@ -60,32 +60,30 @@ namespace DiagramGeneratorUI
 
         private async void PerformAnalysisButtonClick(object sender, RoutedEventArgs e)
         {
-            using (var dialog = new System.Windows.Forms.FolderBrowserDialog())
+            using FolderBrowserDialog dialog = new();
+            analysisBasePath = @"C:\Users\JAH\Documents\Git\xgsos";
+            dialog.SelectedPath = analysisBasePath;
+            if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
-                analysisBasePath = @"C:\Users\JAH\Documents\Git\xgsos";
-                dialog.SelectedPath = analysisBasePath;
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    analysisBasePath = dialog.SelectedPath;
-                    var analyzer = new CSharpAnalyzer(Console.WriteLine);
-                    var files = Directory.EnumerateFiles(analysisBasePath, "*.cs", SearchOption.AllDirectories);
-                    DisableRectangle.Visibility = Visibility.Visible;
-                    Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
-                    collection = await analyzer.AnalyzeFilesAsync(files);
-                    Mouse.OverrideCursor = null;
-                    DisableRectangle.Visibility = Visibility.Hidden;
-                    CollectionLabel.Content = "Unnamed collection";
-                    CollectionLabel.Foreground = Brushes.Orange;
-                    PopulateStartClassComboBox(collection);
-                    DiagramControlsGrid.IsEnabled = true;
-                    SaveAnalysisButton.IsEnabled = true;
-                }
+                analysisBasePath = dialog.SelectedPath;
+                CSharpAnalyzer analyzer = new(Console.WriteLine);
+                IEnumerable<string> files = Directory.EnumerateFiles(analysisBasePath, "*.cs", SearchOption.AllDirectories);
+                DisableRectangle.Visibility = Visibility.Visible;
+                Mouse.OverrideCursor = System.Windows.Input.Cursors.Wait;
+                collection = await analyzer.AnalyzeFilesAsync(files);
+                Mouse.OverrideCursor = null;
+                DisableRectangle.Visibility = Visibility.Hidden;
+                CollectionLabel.Content = "Unnamed collection";
+                CollectionLabel.Foreground = Brushes.Orange;
+                PopulateStartClassComboBox(collection);
+                DiagramControlsGrid.IsEnabled = true;
+                SaveAnalysisButton.IsEnabled = true;
             }
         }
 
         private void SaveAnalysisButtonClick(object sender, RoutedEventArgs e)
         {
-            var saveFileDialog = new SaveFileDialog { FileName = collectionFileName };
+            SaveFileDialog saveFileDialog = new() { FileName = collectionFileName };
             if (saveFileDialog.ShowDialog() == true)
             {
                 collectionFileName = saveFileDialog.FileName;
@@ -98,7 +96,7 @@ namespace DiagramGeneratorUI
 
         private void LoadAnalysisButtonClick(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog { FileName = collectionFileName };
+            OpenFileDialog openFileDialog = new() { FileName = collectionFileName };
             if (openFileDialog.ShowDialog() == true)
             {
                 collectionFileName = openFileDialog.FileName;
@@ -115,7 +113,7 @@ namespace DiagramGeneratorUI
         {
             if (collection != null)
             {
-                var settings = new Settings
+                Settings settings = new()
                 {
                     StartClass = StartClassComboBox.Text,
                     IncludePublicAssociations = PublicAssociationsCheckBox.IsChecked.GetValueOrDefault(),
@@ -124,18 +122,23 @@ namespace DiagramGeneratorUI
                     IncludePrivateAssociations = PrivateAssociationsCheckBox.IsChecked.GetValueOrDefault(),
                     IncludeInheritance = InheritanceCheckBox.IsChecked.GetValueOrDefault()
                 };
-                var coll = settings.StartClass == "" ? collection : collection.Clone(settings.StartClass, settings, (int)DepthSlider.Value);
+                CSharpObjectCollection coll = string.IsNullOrEmpty(settings.StartClass) ? collection : collection.Clone(settings.StartClass, settings, (int)DepthSlider.Value);
 
-                var saveFileDialog = new SaveFileDialog { FileName = diagramFileName };
+                SaveFileDialog saveFileDialog = new()
+                {
+                    Filter = "Plant Uml (*.plantuml)|*.plantuml",
+                    FileName = diagramFileName,
+                    AddExtension = true,
+                    DefaultExt = "plantuml",
+                };
+
                 if (saveFileDialog.ShowDialog() == true)
                 {
                     diagramFileName = saveFileDialog.FileName;
-                    using (TextWriter tw = new StreamWriter(diagramFileName))
+                    using TextWriter tw = new StreamWriter(diagramFileName);
+                    foreach (string s in UmlGenerator.GeneratePlantUml(coll))
                     {
-                        foreach (var s in new UmlGenerator().GeneratePlantUml(coll))
-                        {
-                            tw.WriteLine(s);
-                        }
+                        tw.WriteLine(s);
                     }
                 }
             }
@@ -143,9 +146,9 @@ namespace DiagramGeneratorUI
 
         private void PopulateStartClassComboBox(CSharpObjectCollection collection)
         {
-            var oldStartClass = StartClassComboBox.Text;
-            StartClassComboBox.ItemsSource = collection.Classes.OrderBy(c => c.Name).Select(c => c.Name);
-            var index = StartClassComboBox.Items.IndexOf(oldStartClass);
+            string oldStartClass = StartClassComboBox.Text;
+            StartClassComboBox.ItemsSource = collection.Classes.OrderBy(c => c.Name).Select(c => c.Name).Append("");
+            int index = StartClassComboBox.Items.IndexOf(oldStartClass);
             if (index != -1)
             {
                 StartClassComboBox.SelectedIndex = index;

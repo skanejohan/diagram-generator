@@ -1,6 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 
 namespace DiagramGenerator
 {
@@ -10,26 +10,16 @@ namespace DiagramGenerator
 
         public ConfigFile(string path)
         {
-            var lines = File.ReadAllLines(path);
+            string[] lines = File.ReadAllLines(path);
             values = new Dictionary<string, string>();
-            foreach (var line in lines)
+            foreach (string line in lines)
             {
-                var eqPos = line.IndexOf("=");
+                int eqPos = line.IndexOf("=");
                 if (eqPos > 0)
                 {
-                    values.Add(line.Substring(0, eqPos).Trim(), line.Substring(eqPos+1).Trim());
+                    values.Add(line[..eqPos].Trim(), line[(eqPos + 1)..].Trim());
                 }
             }
-        }
-
-        private T Read<T>(string key, Func<string,T> converter, T def)
-        {
-            string s;
-            if (!values.TryGetValue(key, out s))
-            {
-                return def;
-            }
-            return converter(s);
         }
 
         public string ReadString(string key, string def = "")
@@ -39,8 +29,16 @@ namespace DiagramGenerator
 
         public bool ReadBool(string key, bool def = false)
         {
-            return Read(key, s => s.ToLower() == "1" || s.ToLower() == "t" || s.ToLower() == "true", def);    
+            return Read(key, s => s.ToLower() == "1" || s.ToLower() == "t" || s.ToLower() == "true", def);
         }
 
+        private T Read<T>(string key, Func<string, T> converter, T def)
+        {
+            if (!values.TryGetValue(key, out string s))
+            {
+                return def;
+            }
+            return converter(s);
+        }
     }
 }
